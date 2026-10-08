@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ButtonLink } from "./ui/kit";
 import { MobileNav } from "./MobileNav";
 import { APP_NAME } from "./Layout";
+import { AppFooter } from "./FooterCredits";
 
 const SECTION_LINKS = [
   { label: "Features", href: "#features" },
@@ -77,35 +78,7 @@ export function PublicNav({ links = true }: { links?: boolean }) {
   );
 }
 
-/** Public footer — plain facts only, no invented social accounts. */
+/** Public footer matching the exact neo-brutalist footer layout */
 export function PublicFooter() {
-  return (
-    <footer className="footer">
-      <div className="footer-row">
-        <div className="footer-brand">
-          <span className="sticker sticker-lime">{APP_NAME}</span>
-          <span className="footer-note">Learn • Revise • Grow</span>
-        </div>
-
-        <div className="footer-links">
-          <a href="#features" className="footer-note no-underline">
-            Features
-          </a>
-          <a href="#how-it-works" className="footer-note no-underline">
-            How it works
-          </a>
-          <a href="#pricing" className="footer-note no-underline">
-            Pricing
-          </a>
-          <Link to="/login" className="footer-note no-underline">
-            Log in
-          </Link>
-        </div>
-
-        <p className="footer-note no-margin">
-          © {new Date().getFullYear()} {APP_NAME}
-        </p>
-      </div>
-    </footer>
-  );
+  return <AppFooter />;
 }

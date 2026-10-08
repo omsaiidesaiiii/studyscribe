@@ -3,6 +3,7 @@ import { useAuth } from "@/lib/auth";
 import type { ReactNode } from "react";
 import { Button, Sticker } from "./ui/kit";
 import { MobileNav } from "./MobileNav";
+import { AppFooter } from "./FooterCredits";
 
 /**
  * Single source of truth for the application name.
@@ -151,18 +152,7 @@ export function Layout({
         <div className="container">{children}</div>
       </main>
 
-      <footer className="footer">
-        <div className="footer-row">
-          <div className="footer-brand">
-            <span className="sticker sticker-lime">{APP_NAME}</span>
-            <span className="footer-note">Learn • Revise • Grow</span>
-          </div>
-
-          <p className="footer-note no-margin">
-            © {new Date().getFullYear()} {APP_NAME}
-          </p>
-        </div>
-      </footer>
+      <AppFooter />
     </div>
   );
 }
