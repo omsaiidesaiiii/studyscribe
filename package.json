@@ -1,0 +1,21 @@
+{
+  "name": "notebook-workspace",
+  "private": true,
+  "version": "1.0.0",
+  "description": "YouTube -> handwritten revision notes: Express + BullMQ + Gemini API, with a React neo-brutalist notebook UI",
+  "scripts": {
+    "dev": "concurrently -n api,worker,web -c blue,magenta,green \"npm --prefix server run dev\" \"npm --prefix server run worker\" \"npm --prefix web run dev\"",
+    "dev:infra": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "migrate": "npm --prefix server run migrate",
+    "test": "npm --prefix server test",
+    "typecheck": "npm --prefix server run typecheck && npm --prefix web run typecheck",
+    "build": "npm --prefix server run build && npm --prefix web run build",
+    "pipeline": "npm --prefix server run pipeline --",
+    "e2e": "npm --prefix server run e2e",
+    "setup": "npm --prefix server install && npm --prefix web install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

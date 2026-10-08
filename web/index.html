@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudyScribe — turn YouTube lectures into hand-written notes</title>
+    <meta
+      name="description"
+      content="Turn any YouTube lecture into handwritten-style revision notes, in English, Hindi or Hinglish."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Inter is the body face; Archivo Black the display face; Caveat the
+         handwritten tagline face. Kalam and Architects Daughter are used by the
+         shared notebook markup (the same CSS that produces the PDF), so the
+         on-screen viewer matches the printed pages. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Architects+Daughter&family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&family=Kalam:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Razorpay checkout SDK (exposes the global `Razorpay` for the Credits page). -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

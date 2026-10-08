@@ -1,0 +1,56 @@
+# Local infrastructure for the notebook app.
+#
+# The Compose project name is pinned so this stack can never collide with
+# another copy of the project.
+#
+# Compose matches existing containers by *project name + service name*, not by
+# container_name. Two checkouts living in a directory called "notebook" would
+# both default to the project name "notebook", so `docker compose up` in one
+# checkout would adopt, recreate and steal the containers of the other (and
+# would also fight over the volumes postgres_data/redis_data). Pinning `name`
+# below keeps this copy in its own namespace.
+#
+# Host ports are deliberately non-default for the same reason:
+#   Postgres  ->  host 5455  (container 5432)
+#   Redis     ->  host 6479  (container 6379)
+#
+# The API (5055), worker and web dev server (5273) run outside Docker.
+
+name: studynotes
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: studynotes_pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: notes_user
+      POSTGRES_PASSWORD: notes_dev_password
+      POSTGRES_DB: notes_app
+    ports:
+      - "5455:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notes_user -d notes_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    container_name: studynotes_redis
+    restart: unless-stopped
+    ports:
+      - "6479:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  pg_data:
+  redis_data:

@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Production builds
+dist/
+build/
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+.env.bak
+.env.backup*
+!.env.example
+
+# Runtime & output files
+server/generated/
+*.log
+npm-debug.log*
+
+# Test artifacts & screenshots
+web/ui-screenshots/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Scratch files
+notes

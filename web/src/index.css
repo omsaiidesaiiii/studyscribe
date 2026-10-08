@@ -1,0 +1,11 @@
+/* ============================================================================
+   Entry stylesheet.
+   ----------------------------------------------------------------------------
+   The design system (tokens, reset, layout primitives, every component) lives
+   in `neo-notebook.css` and is imported last so it wins over Tailwind's
+   preflight. Tailwind stays imported for the utility classes used in a few
+   places; nothing here is page-specific.
+   ========================================================================== */
+
+@import "tailwindcss";
+@import "./neo-notebook.css";

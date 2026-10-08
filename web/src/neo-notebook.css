@@ -1,0 +1,2387 @@
+/* ============================================================================
+   StudyScribe design system — hand-drawn notebook neo-brutalism
+   ----------------------------------------------------------------------------
+   Single source of truth. Tailwind v4 reads these tokens via `@theme` so
+   any arbitrary utility matches. Everything below is component + notebook
+   markup CSS.
+
+   Palette (target):
+     paper  #fbf9f2   background
+     lavender #ece9ff  features panel / bento backgrounds
+     lime     #c6f135  primary accent (one memorable element is kept quiet)
+     pink     #ff7a9c
+     violet   #7b5cff
+     yellow   #ffe600
+     orange   #ff7a1a
+     cyan     #3dd6f5
+     ink      #111111
+     red      #ff5c5c  (the ink line on ruled / notebook sheets)
+
+   Rules: 3px solid ink borders; hard shadows 5px 5px 0 ink (no blur, no
+   gradients); radius 6-10px; rotation -4..4deg ONLY on stickers and labels.
+   Yellow marker highlight is a transparent gradient over a single word —
+   never a background block.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   1. Tailwind tokens (`bg-yellow-500`, `text-violet-900`, etc. match these).
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-paper: #fbf9f2;
+  --color-lavender: #ece9ff;
+  --color-lime: #c6f135;
+  --color-pink: #ff7a9c;
+  --color-violet: #7b5cff;
+  --color-yellow: #ffe600;
+  --color-orange: #ff7a1a;
+  --color-cyan: #3dd6f5;
+  --color-ink: #111111;
+  --color-red: #ff5c5c;
+  --color-white: #ffffff;
+  --color-grey-100: #f3f4f6;
+  --color-grey-200: #e5e7e8;
+  --color-grey-300: #d1d5db;
+  --color-grey-400: #9ca3af;
+  --color-grey-500: #6b7280;
+  --color-grey-600: #4b5563;
+  --color-black: #111111;
+  --color-black-10: #1111110a;
+  --color-grid: #e3e0d2;
+
+  --font-display: "Archivo Black", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-hand: "Caveat", "Cookie", cursive;
+  --font-mono: "Space Mono", "Courier New", monospace;
+}
+
+/* Plain aliases for the same tokens, so component CSS can read
+   `var(--paper)` / `var(--ink)` instead of `var(--color-…)`. Tailwind only
+   emits the `--color-*` names from `@theme`. */
+:root {
+  --paper: var(--color-paper);
+  --lavender: var(--color-lavender);
+  --lime: var(--color-lime);
+  --pink: var(--color-pink);
+  --violet: var(--color-violet);
+  --yellow: var(--color-yellow);
+  --orange: var(--color-orange);
+  --cyan: var(--color-cyan);
+  --ink: var(--color-ink);
+  --red: var(--color-red);
+  --white: var(--color-white);
+  --grid: var(--color-grid);
+  --grey-100: var(--color-grey-100);
+  --grey-200: var(--color-grey-200);
+  --grey-300: var(--color-grey-300);
+  --grey-400: var(--color-grey-400);
+  --grey-500: var(--color-grey-500);
+  --grey-600: var(--color-grey-600);
+}
+
+/* ---------------------------------------------------------------------------
+   2. Global reset + page setup
+   --------------------------------------------------------------------------- */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+/* The paper lives on the root, not only on the body: `overflow-x: clip` turns
+   the body into a scroll container, which stops its background from
+   propagating to the canvas — leaving the area outside the page (overscroll,
+   capture padding) painted by the browser's default instead of the paper. */
+html {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  min-width: 0;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:root {
+  color-scheme: light; /* never a dark page */
+}
+
+/* Headings use Archivo Black in sentence case. All-caps is reserved for
+   tiny badges, nav pills and sticker labels (see `.badge`, `.chip`). */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  text-transform: none;
+}
+
+h1 {
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  line-height: 1.02;
+  max-width: 14ch;
+}
+
+a {
+  color: var(--violet);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--ink);
+}
+
+/* Inline SVG doodles render as sized elements. */
+svg {
+  display: block;
+}
+
+.svg-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* 3. Layout primitives. */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 4vw, 32px);
+}
+
+.section {
+  padding-block: clamp(32px, 4.5vw, 56px);
+}
+
+.grid {
+  display: grid;
+  gap: 24px;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.grid-auto {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 820px) {
+  .grid-2,
+  .grid-3,
+  .grid-5,
+  .grid-auto {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+.gap-8 {
+  gap: 2rem;
+}
+.gap-12 {
+  gap: 3rem;
+}
+.gap-16 {
+  gap: 4rem;
+}
+.gap-24 {
+  gap: 6rem;
+}
+.gap-32 {
+  gap: 8rem;
+}
+
+/* 4. Focus + reduced motion. */
+:focus-visible {
+  outline: 3px solid var(--violet);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   5. Components
+   --------------------------------------------------------------------------- */
+
+/* ---- Buttons ------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 3px solid var(--ink);
+  background: var(--white);
+  color: var(--ink);
+  padding: 0.7rem 1.1rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border-radius: 8px;
+  box-shadow: 5px 5px 0 var(--ink);
+  cursor: pointer;
+  transition: transform 90ms ease, box-shadow 90ms ease, background-color 120ms ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+
+.btn:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+.btn-violet {
+  background: var(--violet);
+  color: var(--white);
+}
+
+.btn-violet:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+
+.btn-white {
+  background: var(--white);
+  color: var(--ink);
+}
+
+.btn-white:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+
+.btn-danger {
+  background: var(--red);
+  color: var(--white);
+}
+
+.btn-ink {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.btn-cyan {
+  background: var(--cyan);
+  color: var(--white);
+}
+
+.btn-green {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+.btn-sm {
+  padding: 0.5rem 0.85rem;
+  font-size: 0.78rem;
+  border-radius: 8px;
+}
+
+/* ---- Chips / toggles (aria-pressed, yellow when selected) -------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  /* Nav pills and language toggles read as words, not shouted labels: the
+     TARGET keeps every nav item in sentence case (buttons stay uppercase). */
+  text-transform: none;
+  letter-spacing: 0;
+  background: var(--white);
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+
+.chip:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.chip[aria-pressed="true"],
+.chip.active {
+  background: var(--yellow);
+  color: var(--ink);
+  border-color: var(--yellow);
+}
+
+.chip[aria-pressed="true"]:hover {
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+/* ---- Inputs + selects + labels -------------------------------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.field-label {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--grey-500);
+}
+
+/* A fieldset behaves like a `.field` (no default border/padding). */
+fieldset.field,
+fieldset.language-field {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+legend.field-label {
+  padding: 0;
+}
+
+.input,
+.select {
+  width: 100%;
+  border: 3px solid var(--ink);
+  background: var(--white);
+  padding: 14px 16px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--ink);
+  border-radius: 8px;
+  box-shadow: inset 3px 3px 0 0 var(--ink);
+  transition: transform 90ms ease;
+}
+
+.input:hover,
+.select:hover {
+  transform: translate(-1px, -1px);
+}
+
+.input:focus,
+.select:focus {
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+  transform: translate(-1px, -1px);
+}
+
+/* ---- Sheet (form card with red margin line + spiral holes) -------- */
+.sheet {
+  position: relative;
+  border: 3px solid var(--ink);
+  background: var(--white);
+  border-radius: 10px;
+  box-shadow: 5px 5px 0 var(--ink);
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+.sheet::before,
+.sheet::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--ink);
+}
+
+.sheet::before {
+  top: 0;
+}
+
+.sheet::after {
+  bottom: 0;
+}
+
+.sheet .margin-line {
+  position: relative;
+  padding-top: 4px;
+}
+
+.sheet .spiral-hole {
+  position: absolute;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+/* ---- BookCard (coloured cover) ---------------------------------- */
+.book-card {
+  position: relative;
+  border: 3px solid var(--ink);
+  background: var(--white);
+  border-radius: 8px;
+  box-shadow: 5px 5px 0 var(--ink);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+
+.book-card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+
+.book-cover {
+  height: 80px;
+  border-bottom: 3px solid var(--ink);
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--white);
+}
+
+.book-cover.yellow {
+  color: var(--ink);
+}
+
+.book-cover.pink {
+  color: var(--white);
+  background: var(--pink);
+}
+
+.book-cover.violet {
+  color: var(--white);
+  background: var(--violet);
+}
+
+.book-cover.cyan {
+  color: var(--white);
+  background: var(--cyan);
+}
+
+.book-cover.orange {
+  color: var(--white);
+  background: var(--orange);
+}
+
+.book-body {
+  padding: 0.85rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-top: 3px solid var(--ink);
+}
+
+.book-body .title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1.15;
+  cursor: pointer;
+  /* Long notebook titles truncate with an ellipsis at two lines instead of
+     stretching every card in the grid. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.book-body .meta {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--grey-500);
+}
+
+.book-body .meta .status {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 2px solid var(--ink);
+}
+
+/* ---- Sticker (tilted) ------------------------------------------- */
+.sticker {
+  display: inline-block;
+  padding: 0.4rem 0.85rem;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  transform: rotate(var(--sticker-rot, -2deg));
+  cursor: default;
+  transition: transform 90ms ease;
+}
+
+.sticker:hover {
+  transform: rotate(var(--sticker-rot, -2deg)) translate(-1px, -1px);
+}
+
+.sticker-rotated {
+  --sticker-rot: -2deg;
+}
+
+.sticker-yellow {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+.sticker-pink {
+  background: var(--pink);
+  color: var(--white);
+}
+
+.sticker-violet {
+  background: var(--violet);
+  color: var(--white);
+}
+
+.sticker-lime {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+.sticker-cyan {
+  background: var(--cyan);
+  color: var(--ink);
+}
+
+.sticker-red {
+  background: var(--red);
+  color: var(--white);
+}
+
+/* ONE lime credit sticker (seen only in the signed-in header). */
+.credit-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.credit-cell .sticker {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+/* ---- Badge (tiny all-caps) -------------------------------------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.6rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--white);
+}
+
+.badge-yellow {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+.badge-green {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+.badge-cyan {
+  background: var(--cyan);
+  color: var(--ink);
+}
+
+.badge-pink {
+  background: var(--pink);
+  color: var(--white);
+}
+
+/* ---- Accordion (FAQ) — native <details>, no JS state -------------- */
+.faq-item {
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: 4px 4px 0 var(--ink);
+  margin-bottom: 16px;
+  overflow: hidden;
+  max-width: 60rem;
+}
+
+.faq-question {
+  padding: 16px 20px;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  list-style: none;
+}
+
+.faq-question::-webkit-details-marker {
+  display: none;
+}
+
+.faq-question::after {
+  content: "+";
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  flex: 0 0 auto;
+}
+
+.faq-item[open] .faq-question::after {
+  content: "–";
+}
+
+.faq-item[open] .faq-question {
+  background: var(--yellow);
+}
+
+.faq-answer {
+  padding: 16px 20px;
+  border-top: 3px solid var(--ink);
+  font-size: 0.95rem;
+  color: var(--grey-600);
+}
+
+/* ---- Modal / dialog --------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 70;
+  padding: 1rem;
+}
+
+.modal-sheet {
+  position: relative;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  border-radius: 10px;
+  box-shadow: 8px 8px 0 var(--ink);
+  padding: 1.5rem;
+  max-width: 34rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.modal-sheet .close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  border: 3px solid var(--ink);
+  background: var(--white);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+/* ---- Toast ------------------------------------------------------ */
+.toast-stack {
+  position: fixed;
+  right: clamp(16px, 4vw, 32px);
+  bottom: clamp(16px, 4vw, 32px);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: min(90vw, 22rem);
+}
+
+.toast {
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 5px 5px 0 var(--ink);
+  padding: 0.9rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: var(--white);
+  animation: toast-in 120ms ease;
+}
+
+.toast[data-tone="error"] {
+  background: var(--red);
+  color: var(--white);
+}
+
+.toast[data-tone="success"] {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+.toast[data-tone="info"] {
+  background: var(--white);
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ---- Skeleton / loaders --------------------------------------- */
+.skeleton {
+  border-radius: 8px;
+  background: var(--grey-200);
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton.block {
+  height: 120px;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ---- Empty / error states ------------------------------------- */
+.empty-state {
+  border: 3px dashed var(--ink);
+  border-radius: 10px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+
+.empty-state .title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+}
+
+.empty-state .doodle {
+  width: 48px;
+  height: 48px;
+  color: var(--grey-400);
+}
+
+.error-state {
+  border: 3px solid var(--red);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  background: var(--paper);
+}
+
+/* ---- Progress bar (hard shadow, no soft) ------------------------- */
+.progress-track {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.progress-track .track {
+  flex: 1;
+  height: 12px;
+  border: 3px solid var(--ink);
+  background: var(--white);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-track .fill {
+  height: 100%;
+  background: var(--yellow);
+  border-radius: 6px;
+  transition: width 200ms ease;
+}
+
+/* ---- Ruled notebook page (viewer, hero, sample) ------------------ */
+.ruled-paper {
+  padding: 1.4rem 1.25rem 2.2rem 1.25rem;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 5px 5px 0 var(--ink);
+  font-family: var(--font-hand);
+  position: relative;
+}
+
+.ruled-paper::before {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: var(--red);
+  border-radius: 2px;
+}
+
+.ruled-paper .rule-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 1.15rem,
+    var(--grid) 1.15rem,
+    var(--grid) 1.2rem
+  );
+}
+
+/* ---- Book stack (CODE / LEARN / GROW) ---------------------------- */
+.book-stack {
+  display: grid;
+  grid-template-rows: repeat(3, 46px);
+  gap: 12px;
+  transform: rotate(-6deg);
+}
+
+.book-stack .book {
+  position: relative;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 5px 5px 0 var(--ink);
+  overflow: hidden;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+}
+
+.book-stack .book::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  /* Faint page rules over the cover colour (the colour must stay visible). */
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 30px,
+    rgba(17, 17, 17, 0.14) 30px,
+    rgba(17, 17, 17, 0.14) 32px
+  );
+  pointer-events: none;
+}
+
+.book-stack .book .spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30px;
+  background: var(--ink);
+  border-radius: 10px 0 0 10px;
+}
+
+.book-stack .book .label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  text-shadow: 2px 2px 0 var(--ink);
+  padding: 0.15rem 0.35rem;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+}
+
+.book-stack .book.yellow {
+  background: var(--yellow);
+}
+
+.book-stack .book.yellow .spine {
+  background: var(--ink);
+}
+
+.book-stack .book.pink {
+  background: var(--pink);
+}
+
+.book-stack .book.pink .spine {
+  background: var(--ink);
+}
+
+.book-stack .book.violet {
+  background: var(--violet);
+}
+
+.book-stack .book.violet .spine {
+  background: var(--ink);
+}
+
+.book-stack .book .page {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.book-stack .book .page .line {
+  width: 80%;
+  height: 2px;
+  border: 2px dashed var(--grid);
+}
+
+/* ---- Hero notebook note (tilted) --------------------------------- */
+.hero-note {
+  position: relative;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  background: var(--white);
+  box-shadow: 5px 5px 0 var(--ink);
+  transform: rotate(var(--hero-rot, -4deg));
+  padding: 1.2rem;
+  max-width: 300px;
+  isolation: isolate;
+}
+
+.hero-note .margin {
+  position: absolute;
+  left: 0.35rem;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: var(--red);
+  border-radius: 2px;
+}
+
+.hero-note .rule-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 1.1rem,
+    var(--grid) 1.1rem,
+    var(--grid) 1.2rem
+  );
+}
+
+/* ---------- Feature icon tiles (coloured square + inline SVG) ---------- */
+.feature-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.feature-icon.yellow {
+  background: var(--yellow);
+}
+
+.feature-icon.pink {
+  background: var(--pink);
+}
+
+.feature-icon.violet {
+  background: var(--violet);
+}
+
+.feature-icon.cyan {
+  background: var(--cyan);
+}
+
+.feature-icon.green {
+  background: var(--lime);
+}
+
+.feature-icon.orange {
+  background: var(--orange);
+}
+
+/* ---------- SVG doodle snippets (inline, no external images) ---------- */
+.spotlight {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid var(--ink);
+  background: var(--yellow);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.spotlight svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--ink);
+  fill: none;
+}
+
+.starry {
+  stroke: var(--ink);
+}
+
+.handle {
+  stroke: var(--ink);
+  fill: none;
+}
+
+.arrow-h {
+  stroke: var(--pink);
+  fill: none;
+}
+
+.smiley {
+  stroke: var(--ink);
+  fill: var(--white);
+}
+
+.scribble {
+  stroke: var(--ink);
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- Marker highlight on a single key word. ----------------------
+   Named `.marker` (not `.highlight`) because the shared notebook stylesheet
+   — injected globally so the PDF preview matches the download — already owns
+   `.highlight` for highlighted words inside note pages. */
+.marker {
+  background: linear-gradient(transparent 60%, var(--yellow) 60%);
+}
+
+.ruled-paper .marker {
+  background: linear-gradient(transparent 60%, var(--yellow) 60%);
+}
+
+/* ---------- Print-ready and plain utility ------------------------------- */
+.fade {
+  opacity: 0.85;
+}
+
+/* ------------------------------------------------------------- */
+/* 6. Footer */
+/* ------------------------------------------------------------- */
+.footer {
+  border-top: 3px solid var(--ink);
+  background: var(--paper);
+}
+
+.footer-row {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(16px, 4vw, 32px) clamp(16px, 4vw, 32px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--grey-500);
+}
+
+/* ---------------------------------------------------------------------------
+   7. App shell (public top bar + signed-in sticky header)
+   --------------------------------------------------------------------------- */
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* ---- Mobile navigation (hamburger) -------------------------------
+   Wide screens use the inline `.nav` pills; narrow screens replace them
+   with a hamburger and a panel so the header stays a single row. */
+.nav-menu {
+  position: relative;
+  margin-left: auto;
+}
+
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  background: var(--yellow);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.nav-toggle:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.nav-toggle:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.nav-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 20px;
+}
+
+.nav-bars span {
+  display: block;
+  height: 3px;
+  background: var(--ink);
+  border-radius: 2px;
+}
+
+.nav-menu-panel {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  /* Inline links, the account tag and the desktop buttons move into the
+     panel. The credit sticker stays in the header — that number is the one
+     worth keeping in sight.
+
+     `.nav` and `.toolbar-auth` are declared later in this file for wide
+     screens, so these selectors carry the header class to win on specificity
+     rather than on order. */
+  .topbar .nav,
+  .toolbar .nav,
+  .topbar .toolbar-auth,
+  .toolbar .toolbar-auth,
+  .toolbar-user .user-tag,
+  .toolbar-user .btn {
+    display: none;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+  }
+
+  .nav-menu-panel {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: min(260px, calc(100vw - 40px));
+    padding: 16px;
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: 10px;
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+
+  .nav-menu-panel[hidden] {
+    display: none;
+  }
+
+  .nav-menu-panel .chip,
+  .nav-menu-panel .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-menu-user {
+    overflow: hidden;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--grey-500);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.toolbar,
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--paper);
+  border-bottom: 3px solid var(--ink);
+}
+
+.toolbar-row {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 12px clamp(16px, 4vw, 32px);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.brand .sticker {
+  --sticker-rot: -2deg;
+  font-size: 0.9rem;
+  padding: 0.45rem 0.9rem;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* The active nav pill is yellow, same size as the others. */
+.chip-active,
+.chip[aria-current="page"] {
+  background: var(--yellow);
+  border-color: var(--ink);
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.toolbar-user,
+.toolbar-auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.user-tag {
+  max-width: 16ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.shell-frame {
+  flex: 1 1 auto;
+  width: 100%;
+  padding-block: clamp(24px, 4vw, 40px) clamp(48px, 8vw, 96px);
+}
+
+/* ---------------------------------------------------------------------------
+   8. Blocks: cards, panels, headers, small helpers
+   --------------------------------------------------------------------------- */
+.card {
+  border: 3px solid var(--ink);
+  background: var(--white);
+  border-radius: 10px;
+  box-shadow: 5px 5px 0 var(--ink);
+  padding: 24px;
+  min-width: 0;
+}
+
+.panel {
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 5px 5px 0 var(--ink);
+  background: var(--white);
+  padding: clamp(24px, 4vw, 48px);
+  min-width: 0;
+}
+
+.panel-lavender {
+  background: var(--lavender);
+}
+
+.panel-pink {
+  background: var(--pink);
+}
+
+.panel-lime {
+  background: var(--lime);
+}
+
+.panel-yellow {
+  background: var(--yellow);
+}
+
+/* NOTE: `.section-head` is reserved by the shared notebook CSS (note section
+   headings inside the viewer). Keep this named `.panel-head`. */
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 0 0 clamp(24px, 3vw, 40px);
+}
+
+.panel-head h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: clamp(24px, 4vw, 40px);
+}
+
+.page-head h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  max-width: 22ch;
+}
+
+.lede {
+  font-family: var(--font-hand);
+  font-size: 1.35rem;
+  line-height: 1.35;
+  color: var(--ink);
+  max-width: 46ch;
+}
+
+.muted {
+  color: var(--grey-600);
+  font-size: 0.9rem;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.stack-lg {
+  gap: 32px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.check-list {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px 24px;
+}
+
+.check-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.check-list svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.arrow-doodle {
+  width: 48px;
+  height: 24px;
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+.spacer-sm {
+  height: 16px;
+}
+
+.spacer-md {
+  height: 32px;
+}
+
+.spacer-lg {
+  height: 64px;
+}
+
+/* ---------------------------------------------------------------------------
+   9. Landing page
+   --------------------------------------------------------------------------- */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(32px, 5vw, 64px);
+  align-items: center;
+}
+
+.hero h1 {
+  margin: 16px 0;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.hero-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+  min-width: 0;
+}
+
+.hero-stack {
+  position: relative;
+  width: min(100%, 420px);
+}
+
+.hero-back {
+  position: absolute;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 5px 5px 0 var(--ink);
+  z-index: 0;
+}
+
+.hero-back.violet {
+  inset: 24px -16px -24px 16px;
+  background: var(--violet);
+  transform: rotate(3deg);
+}
+
+.hero-back.pink {
+  inset: -16px 24px 24px -16px;
+  background: var(--pink);
+  transform: rotate(-3deg);
+}
+
+.hero-note-wrap {
+  position: relative;
+  z-index: 1;
+}
+
+/* Named `.hero-sticky` — `.sticky-note` belongs to the shared notebook CSS. */
+.hero-sticky {
+  position: absolute;
+  top: -34px;
+  right: -28px;
+  z-index: 3;
+  width: 132px;
+  padding: 12px;
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+  background: var(--lime);
+  box-shadow: 5px 5px 0 var(--ink);
+  transform: rotate(4deg);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  line-height: 1.15;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.book-stack-wrap {
+  position: absolute;
+  right: -8px;
+  bottom: -32px;
+  z-index: 3;
+  width: 132px;
+}
+
+.star-doodle {
+  position: absolute;
+  left: -16px;
+  bottom: -8px;
+  z-index: 3;
+  width: 48px;
+  height: 48px;
+}
+
+/* Five features, five across — the TARGET row. */
+/* The TARGET frames the “How it works” sticker, heading and cards in one
+   bordered box; `.section` keeps the vertical rhythm between boxes. */
+.how-panel {
+  margin-block: clamp(24px, 3vw, 40px);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 5px 5px 0 var(--ink);
+  background: var(--white);
+  padding: clamp(24px, 4vw, 40px);
+  min-width: 0;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 1080px) {
+  .feature-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.feature-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.feature-tile h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.feature-tile p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--grey-600);
+}
+
+.step-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.step-card {
+  position: relative;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  background: var(--white);
+  box-shadow: 5px 5px 0 var(--ink);
+  padding: 32px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.step-num {
+  position: absolute;
+  top: -14px;
+  left: -12px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  box-shadow: 4px 4px 0 var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  transform: rotate(-4deg);
+  background: var(--yellow);
+}
+
+.step-card h3 {
+  margin: 8px 0 0;
+  font-size: 1.05rem;
+}
+
+.step-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--grey-600);
+}
+
+.step-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.sample-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(24px, 4vw, 48px);
+  align-items: center;
+}
+
+.love-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.love-card {
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  background: var(--white);
+  box-shadow: 4px 4px 0 var(--ink);
+  padding: 16px;
+  font-size: 0.95rem;
+}
+
+.love-card .love-title {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+.plan {
+  position: relative;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  background: var(--white);
+  box-shadow: 5px 5px 0 var(--ink);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.plan.featured {
+  background: var(--lime);
+}
+
+.plan .amount {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.3rem);
+  line-height: 1;
+}
+
+.plan .credits {
+  font-weight: 700;
+}
+
+.plan ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.95rem;
+  flex: 1 1 auto;
+}
+
+.final-cta {
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  background: var(--yellow);
+  box-shadow: 6px 6px 0 var(--ink);
+  padding: clamp(24px, 4vw, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.final-cta h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  max-width: 24ch;
+}
+
+.footer .brand .sticker {
+  font-size: 0.85rem;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-note {
+  font-size: 0.78rem;
+  color: var(--grey-500);
+}
+
+/* The landing/hero and sample grids collapse to a single column. */
+@media (max-width: 820px) {
+  .hero,
+  .sample-grid,
+  .love-grid,
+  .step-row {
+    grid-template-columns: 1fr;
+  }
+
+  .step-row .arrow-doodle {
+    justify-self: center;
+    transform: rotate(90deg);
+  }
+
+  .hero-visual {
+    padding: 32px 16px 48px;
+  }
+
+  .hero-sticky {
+    right: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   10. Auth pages
+   --------------------------------------------------------------------------- */
+.auth-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 64px);
+  align-items: center;
+  padding-block: clamp(32px, 6vw, 64px);
+}
+
+.auth-panel {
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 6px 6px 0 var(--ink);
+  padding: clamp(24px, 4vw, 40px);
+  background: var(--lavender);
+  min-width: 0;
+}
+
+.auth-panel h2 {
+  margin: 0 0 16px;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.auth-panel .benefits {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-panel .benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.auth-panel .benefits svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+
+.auth-col {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+}
+
+.auth-card h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.auth-card .card-subtitle {
+  margin: 0 0 24px;
+  font-size: 0.92rem;
+  color: var(--grey-600);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-form .btn {
+  width: 100%;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--grey-500);
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 3px;
+  background: var(--ink);
+  opacity: 0.2;
+}
+
+.google-area {
+  display: flex;
+  justify-content: center;
+}
+
+.auth-foot {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Tilted notebook preview inside the colour panel. */
+.panel-note-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.panel-note {
+  --hero-rot: -3deg;
+  max-width: 280px;
+  width: 100%;
+  padding: 20px;
+}
+
+/* Mobile: the form comes first, the colourful panel is hidden. */
+@media (max-width: 820px) {
+  .auth-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-panel {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   11. Small components used by the kit
+   --------------------------------------------------------------------------- */
+.alert {
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  box-shadow: 4px 4px 0 var(--ink);
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.alert-error {
+  background: var(--red);
+  color: var(--white);
+}
+
+.alert-info {
+  background: var(--lavender);
+  color: var(--ink);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-red {
+  background: var(--red);
+  color: var(--white);
+}
+
+.badge-white {
+  background: var(--white);
+  color: var(--ink);
+}
+
+.spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.spinner-ring {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid var(--ink);
+  border-top-color: transparent;
+  animation: spinner-turn 700ms linear infinite;
+  flex: 0 0 auto;
+}
+
+@keyframes spinner-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Steps list for generation progress. */
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: var(--white);
+  color: var(--grey-500);
+  min-width: 0;
+}
+
+.steps li[data-state="done"],
+.steps li[data-state="current"] {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+.steps .step-badge {
+  font-family: var(--font-display);
+}
+
+/* Notebook viewer frame: ruled paper with a red margin line. */
+.notebook-frame {
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  background: var(--paper);
+  box-shadow: 5px 5px 0 var(--ink);
+  padding: 24px 24px 24px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.notebook-frame::before {
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--red);
+}
+
+.notebook-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  min-width: 0;
+}
+
+/* Individual pages are styled by the shared notebook stylesheet, so the
+   preview matches the printed PDF. Only the frame is ours. */
+@media (max-width: 820px) {
+  .notebook-frame {
+    padding: 16px 16px 16px 28px;
+  }
+
+  .notebook-frame::before {
+    left: 12px;
+  }
+}
+
+.no-underline {
+  text-decoration: none;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.center-text {
+  text-align: center;
+}
+
+/* ---- Hero notebook text (handwritten, marker-highlighted title) ---- */
+.hero-note h2,
+.sample-note h3 {
+  margin: 0 0 12px;
+  font-family: var(--font-hand);
+  font-size: 1.7rem;
+  line-height: 1.1;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.hero-note p {
+  margin: 0 0 8px;
+  font-family: var(--font-hand);
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+
+.hero-note .hero-graph {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  margin-top: 8px;
+}
+
+.hero-note .hero-note-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.sample-note {
+  max-width: 420px;
+  margin-inline: auto;
+}
+
+.sample-note .sample-steps {
+  margin: 0;
+  padding-left: 22px;
+  font-family: var(--font-hand);
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+.sample-note .sample-array {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  margin-top: 12px;
+}
+
+.sample-note .badge {
+  background: var(--yellow);
+  margin-bottom: 12px;
+}
+
+/* ---- Step numbers (pink / lime / violet corner tabs) ---- */
+.step-num.pink {
+  background: var(--pink);
+  color: var(--white);
+}
+
+.step-num.lime {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+.step-num.violet {
+  background: var(--violet);
+  color: var(--white);
+}
+
+/* ---- Empty / error state bits used by the kit ---- */
+.empty-doodle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.empty-state .title,
+.error-state .title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
+/* When the state *is* the page (404, missing notebook) its title is the page
+   <h1>, so it must not inherit the 14ch hero max-width from the h1 rule. */
+.empty-state .title.is-page,
+.error-state .title.is-page {
+  max-width: 24ch;
+  margin-inline: auto;
+  font-size: clamp(1.5rem, 4.2vw, 2.2rem);
+  text-transform: none;
+}
+
+.empty-copy {
+  max-width: 44ch;
+  margin-inline: auto;
+}
+
+.empty-action {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+/* ---- Modal extras + toast close ---- */
+.modal-title {
+  margin: 0 0 12px;
+  font-size: 1.4rem;
+  padding-right: 32px;
+}
+
+.modal-footer {
+  margin-top: 24px;
+  justify-content: flex-end;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.toast-close {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--ink);
+  line-height: 1;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+/* ---- Notebook title on the generation card ---- */
+.notebook-title {
+  margin: 0 0 6px;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  max-width: 30ch;
+}
+
+/* ---- Credits / pricing page ---- */
+.plan.owned {
+  background: var(--paper);
+}
+
+.plan .plan-lines {
+  font-size: 0.9rem;
+  color: var(--grey-600);
+}
+
+.purchase-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.purchase-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-bottom: 2px dashed var(--grid);
+  padding-bottom: 12px;
+  font-size: 0.92rem;
+}
+
+/* ---- Book cover label ---- */
+.book-cover .cover-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Landing extras ---- */
+.no-margin {
+  margin: 0;
+}
+
+.hero-sticky .sticky-smiley {
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
+}
+
+.that-is-it {
+  margin-top: 32px;
+  gap: 16px;
+  /* Sits at the end of the step row, like the TARGET's “That's it!” note. */
+  justify-content: flex-end;
+}
+
+.pricing-note {
+  margin: 24px 0 0;
+}
+
+.love-panel {
+  padding: clamp(20px, 3vw, 32px);
+  background: var(--white);
+}
+
+/* ---- Footer brand block ---- */
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.footer-brand .sticker {
+  font-size: 0.85rem;
+  background: var(--lime);
+  color: var(--ink);
+}
