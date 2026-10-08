@@ -13,7 +13,7 @@ const set = (key, value) => {
   }
 };
 
-set("RAZORPAY_KEY_SECRET", "0fj3MNi3amE56eqZjaKoi9G1");
+set("RAZORPAY_KEY_SECRET");
 env = env.replace("Steam in razorpay.in", "Settings in razorpay.in");
 
 fs.writeFileSync(path, env);
